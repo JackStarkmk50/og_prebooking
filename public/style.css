@@ -2059,6 +2059,25 @@ button:disabled, input:disabled {
     gap: var(--space-sm);
   }
 
+  .input-control input,
+  .mobile-input-wrap input {
+    font-size: 16px;
+  }
+
+  .ticket-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-sm);
+  }
+
+  .ticket-bottom-stub {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ticket-actions-bar {
+    flex-direction: column;
+  }
+
   .footer-inner {
     grid-template-columns: minmax(0, 1fr);
   }
