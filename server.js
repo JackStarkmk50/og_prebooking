@@ -96,36 +96,42 @@ app.get('/api/stations', (req, res) => {
 });
 
 // ─── GET /api/slots ───────────────────────────────────────────────────────────
-app.get('/api/slots', (req, res) => {
+app.get('/api/slots', async (req, res) => {
   const { ps_id, date } = req.query;
 
   if (!ps_id || !date) {
     return res.status(400).json({ error: 'ps_id and date are required' });
   }
 
-  // Gather all bookings for this PS + date
-  const rows = db.prepare(
-    'SELECT slots FROM bookings WHERE ps_id = ? AND date = ?'
-  ).all(Number(ps_id), date);
+  try {
+    // Gather all bookings for this PS + date
+    const rows = await db.all(
+      'SELECT slots FROM bookings WHERE ps_id = ? AND date = ?',
+      [Number(ps_id), date]
+    );
 
-  const bookedHours = new Set();
-  for (const row of rows) {
-    try {
-      const slotArr = JSON.parse(row.slots);
-      slotArr.forEach(h => bookedHours.add(h));
-    } catch (e) {}
+    const bookedHours = new Set();
+    for (const row of rows) {
+      try {
+        const slotArr = JSON.parse(row.slots);
+        slotArr.forEach(h => bookedHours.add(h));
+      } catch (e) {}
+    }
+
+    const slots = [];
+    for (let hour = 0; hour < 24; hour++) {
+      slots.push({ hour, booked: bookedHours.has(hour) });
+    }
+
+    res.json({ slots, min_date: MIN_BOOKING_DATE });
+  } catch (err) {
+    console.error('Error fetching slots:', err);
+    res.status(500).json({ error: 'Failed to retrieve slot availability' });
   }
-
-  const slots = [];
-  for (let hour = 0; hour < 24; hour++) {
-    slots.push({ hour, booked: bookedHours.has(hour) });
-  }
-
-  res.json({ slots, min_date: MIN_BOOKING_DATE });
 });
 
 // ─── POST /api/book ───────────────────────────────────────────────────────────
-app.post('/api/book', (req, res) => {
+app.post('/api/book', async (req, res) => {
   const { ps_id, date, slots, customer_name, customer_mobile, confirmed } = req.body;
 
   // Validations
@@ -161,61 +167,67 @@ app.post('/api/book', (req, res) => {
     return res.status(400).json({ error: 'Attendance confirmation is required' });
   }
 
-  // Check for conflicts
-  const existingRows = db.prepare(
-    'SELECT slots FROM bookings WHERE ps_id = ? AND date = ?'
-  ).all(Number(ps_id), date);
+  try {
+    // Check for conflicts
+    const existingRows = await db.all(
+      'SELECT slots FROM bookings WHERE ps_id = ? AND date = ?',
+      [Number(ps_id), date]
+    );
 
-  const bookedHours = new Set();
-  for (const row of existingRows) {
-    try {
-      JSON.parse(row.slots).forEach(h => bookedHours.add(h));
-    } catch (e) {}
+    const bookedHours = new Set();
+    for (const row of existingRows) {
+      try {
+        JSON.parse(row.slots).forEach(h => bookedHours.add(h));
+      } catch (e) {}
+    }
+
+    const conflict = sortedSlots.some(h => bookedHours.has(h));
+    if (conflict) {
+      return res.status(409).json({ error: 'One or more of the selected time slots are already booked.' });
+    }
+
+    // Calculate price
+    const totalPrice = calculatePrice(ps_id, sortedSlots.length);
+
+    // Generate unique booking ID
+    let booking_id;
+    let attempts = 0;
+    do {
+      booking_id = generateBookingId();
+      const existing = await db.get('SELECT 1 FROM bookings WHERE booking_id = ?', [booking_id]);
+      if (!existing) break;
+      attempts++;
+    } while (attempts < 20);
+
+    // Insert into DB
+    await db.run(
+      `INSERT INTO bookings (booking_id, ps_id, ps_name, date, slots, customer_name, customer_mobile, confirmed, total_price)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        booking_id,
+        Number(ps_id),
+        PS_STATIONS[ps_id].name,
+        date,
+        JSON.stringify(sortedSlots),
+        customer_name.trim(),
+        customer_mobile.trim(),
+        confirmed ? 1 : 0,
+        totalPrice
+      ]
+    );
+
+    res.json({
+      success: true,
+      booking_id,
+      total_price: totalPrice,
+      date,
+      slots: sortedSlots,
+      ps_name: PS_STATIONS[ps_id].name
+    });
+  } catch (err) {
+    console.error('Error inserting booking:', err);
+    res.status(500).json({ error: 'Failed to save booking. Please retry.' });
   }
-
-  const conflict = sortedSlots.some(h => bookedHours.has(h));
-  if (conflict) {
-    return res.status(409).json({ error: 'One or more of the selected time slots are already booked.' });
-  }
-
-  // Calculate price
-  const totalPrice = calculatePrice(ps_id, sortedSlots.length);
-
-  // Generate unique booking ID
-  let booking_id;
-  let attempts = 0;
-  do {
-    booking_id = generateBookingId();
-    attempts++;
-  } while (
-    db.prepare('SELECT 1 FROM bookings WHERE booking_id = ?').get(booking_id) &&
-    attempts < 20
-  );
-
-  // Insert into DB
-  db.prepare(`
-    INSERT INTO bookings (booking_id, ps_id, ps_name, date, slots, customer_name, customer_mobile, confirmed, total_price)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(
-    booking_id,
-    Number(ps_id),
-    PS_STATIONS[ps_id].name,
-    date,
-    JSON.stringify(sortedSlots),
-    customer_name.trim(),
-    customer_mobile.trim(),
-    confirmed ? 1 : 0,
-    totalPrice
-  );
-
-  res.json({
-    success: true,
-    booking_id,
-    total_price: totalPrice,
-    date,
-    slots: sortedSlots,
-    ps_name: PS_STATIONS[ps_id].name
-  });
 });
 
 // ─── ADMIN API: LOGIN ─────────────────────────────────────────────────────────
@@ -231,60 +243,70 @@ app.post('/api/admin/login', (req, res) => {
 });
 
 // ─── ADMIN API: GET BOOKINGS ──────────────────────────────────────────────────
-app.get('/api/admin/bookings', verifyAdmin, (req, res) => {
-  const rows = db.prepare('SELECT * FROM bookings').all();
+app.get('/api/admin/bookings', verifyAdmin, async (req, res) => {
+  try {
+    const rows = await db.all('SELECT * FROM bookings');
 
-  // Parse slots and compute earliest hour for chronological time sorting
-  const formatted = rows.map(r => {
-    let slotArr = [];
-    try {
-      slotArr = JSON.parse(r.slots);
-    } catch (e) {
-      slotArr = [];
-    }
-    const startHour = slotArr.length > 0 ? Math.min(...slotArr) : 0;
-    const endHour = slotArr.length > 0 ? Math.max(...slotArr) + 1 : 0;
+    // Parse slots and compute earliest hour for chronological time sorting
+    const formatted = rows.map(r => {
+      let slotArr = [];
+      try {
+        slotArr = JSON.parse(r.slots);
+      } catch (e) {
+        slotArr = [];
+      }
+      const startHour = slotArr.length > 0 ? Math.min(...slotArr) : 0;
+      const endHour = slotArr.length > 0 ? Math.max(...slotArr) + 1 : 0;
 
-    return {
-      ...r,
-      slots: slotArr,
-      startHour,
-      endHour,
-      hoursCount: slotArr.length
-    };
-  });
+      return {
+        ...r,
+        slots: slotArr,
+        startHour,
+        endHour,
+        hoursCount: slotArr.length
+      };
+    });
 
-  // Time order by default: date ASC, then earliest startHour ASC
-  formatted.sort((a, b) => {
-    if (a.date !== b.date) {
-      return a.date.localeCompare(b.date);
-    }
-    return a.startHour - b.startHour;
-  });
+    // Time order by default: date ASC, then earliest startHour ASC
+    formatted.sort((a, b) => {
+      if (a.date !== b.date) {
+        return a.date.localeCompare(b.date);
+      }
+      return a.startHour - b.startHour;
+    });
 
-  res.json({ bookings: formatted });
+    res.json({ bookings: formatted });
+  } catch (err) {
+    console.error('Error fetching admin bookings:', err);
+    res.status(500).json({ error: 'Failed to load bookings' });
+  }
 });
 
 // ─── ADMIN API: DELETE BOOKING ────────────────────────────────────────────────
-app.delete('/api/admin/bookings/:id', verifyAdmin, (req, res) => {
+app.delete('/api/admin/bookings/:id', verifyAdmin, async (req, res) => {
   const { id } = req.params;
   if (!id) {
     return res.status(400).json({ error: 'Booking ID is required' });
   }
 
-  const existing = db.prepare('SELECT * FROM bookings WHERE id = ? OR booking_id = ?').get(id, id);
-  if (!existing) {
-    return res.status(404).json({ error: 'Booking not found' });
+  try {
+    const existing = await db.get('SELECT * FROM bookings WHERE id = ? OR booking_id = ?', [id, id]);
+    if (!existing) {
+      return res.status(404).json({ error: 'Booking not found' });
+    }
+
+    await db.run('DELETE FROM bookings WHERE id = ?', [existing.id]);
+
+    res.json({
+      success: true,
+      message: `Booking ${existing.booking_id} deleted successfully`,
+      deleted_id: existing.id,
+      booking_id: existing.booking_id
+    });
+  } catch (err) {
+    console.error('Error deleting booking:', err);
+    res.status(500).json({ error: 'Failed to delete booking' });
   }
-
-  db.prepare('DELETE FROM bookings WHERE id = ?').run(existing.id);
-
-  res.json({
-    success: true,
-    message: `Booking ${existing.booking_id} deleted successfully`,
-    deleted_id: existing.id,
-    booking_id: existing.booking_id
-  });
 });
 
 // ─── Fallback (Client Single Page Application) ────────────────────────────────
@@ -292,8 +314,13 @@ app.get('/{*splat}', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Start Server
-app.listen(PORT, () => {
-  console.log(`\n🎮 Offgrid Gamers Prebooking Server active at http://localhost:${PORT}`);
-  console.log(`🔐 Admin Portal active at http://localhost:${PORT}/admin (Password: ${ADMIN_PASSWORD})\n`);
-});
+// Export app for Vercel Serverless Function
+module.exports = app;
+
+// Start Server when run directly
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`\n🎮 Offgrid Gamers Prebooking Server active at http://localhost:${PORT}`);
+    console.log(`🔐 Admin Portal active at http://localhost:${PORT}/admin (Password: ${ADMIN_PASSWORD})\n`);
+  });
+}
