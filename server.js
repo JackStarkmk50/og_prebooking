@@ -41,10 +41,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // PS Station definitions
 const PS_STATIONS = {
-  1: { id: 1, name: 'PS1 Hardcore', type: 'hardcore' },
-  2: { id: 2, name: 'PS2 Hardcore', type: 'hardcore' },
-  3: { id: 3, name: 'PS3 Hardcore', type: 'hardcore' },
-  4: { id: 4, name: 'PS4 Lounge',   type: 'lounge'   },
+  1: { id: 1, name: 'PS5 Hardcore 1', type: 'hardcore' },
+  2: { id: 2, name: 'PS5 Hardcore 2', type: 'hardcore' },
+  3: { id: 3, name: 'PS5 Hardcore 3', type: 'hardcore' },
+  4: { id: 4, name: 'PS5 Lounge',     type: 'lounge'   },
 };
 
 // Price calculation

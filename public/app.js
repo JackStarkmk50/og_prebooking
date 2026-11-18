@@ -198,9 +198,9 @@ function renderPSCards() {
       'DualSense Edge Controller'
     ],
     lounge: [
-      'Sony Bravia OLED',
-      'Plush 4-Seater Couch',
-      'Dolby Atmos Spatial Audio'
+      '65" 4K Smart TV',
+      'Comfortable Sofa Seating',
+      'Dual Wireless Controllers'
     ],
   };
 
