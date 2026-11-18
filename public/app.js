@@ -194,12 +194,11 @@ function renderPSCards() {
 
   const features = {
     hardcore: [
-      '4K 144Hz Pro Display',
-      'Secretlab Titan Evo Chair',
+      'Comfortable Sofa',
       'DualSense Edge Controller'
     ],
     lounge: [
-      '85" Sony Bravia 4K OLED',
+      'Sony Bravia OLED',
       'Plush 4-Seater Couch',
       'Dolby Atmos Spatial Audio'
     ],
