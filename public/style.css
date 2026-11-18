@@ -57,6 +57,9 @@
   --color-success:         #10b981;
   --color-success-bg:      rgba(16, 185, 129, 0.12);
   --color-success-border:  rgba(16, 185, 129, 0.28);
+  --color-warning:         #f59e0b;
+  --color-warning-bg:      rgba(245, 158, 11, 0.12);
+  --color-warning-border:  rgba(245, 158, 11, 0.32);
 
   /* Focus Indicator */
   --color-focus:           #d26415;
@@ -1131,6 +1134,31 @@ button:disabled, input:disabled {
   flex-shrink: 0;
 }
 
+.pass-policy-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  background-color: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-border);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--color-text-secondary);
+}
+
+.pass-policy-note strong {
+  color: var(--color-warning);
+}
+
+.policy-clock-svg {
+  width: 14px;
+  height: 14px;
+  color: var(--color-warning);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
 /* ── §9 CHECKOUT & VERIFICATION DIALOG ────────────────────────── */
 .modal-backdrop {
   position: fixed;
@@ -1215,7 +1243,33 @@ button:disabled, input:disabled {
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);
-  margin-bottom: var(--space-lg);
+  margin-bottom: var(--space-md);
+}
+
+.modal-policy-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  background-color: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-border);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-md);
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--color-text-secondary);
+}
+
+.modal-policy-alert strong {
+  color: var(--color-warning);
+}
+
+.alert-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--color-warning);
+  flex-shrink: 0;
+  margin-top: 1px;
 }
 
 .summary-line {
@@ -1903,6 +1957,31 @@ button:disabled, input:disabled {
   font-family: var(--font-mono);
   font-size: 10px;
   color: var(--color-text-tertiary);
+}
+
+.ticket-policy-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  background-color: var(--color-warning-bg);
+  border: 1px dashed var(--color-warning-border);
+  border-radius: var(--radius-xs);
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-sm);
+}
+
+.ticket-policy-banner strong {
+  color: var(--color-warning);
+}
+
+.ticket-policy-banner svg {
+  width: 14px;
+  height: 14px;
+  color: var(--color-warning);
+  flex-shrink: 0;
 }
 
 .ticket-address-footer {

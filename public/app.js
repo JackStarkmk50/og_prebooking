@@ -744,6 +744,14 @@ function showSuccess(data, ps, slots, customerName, customerMobile) {
           </div>
         </div>
 
+        <div class="ticket-policy-banner">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          <span><strong>15-MIN RULE:</strong> Station is held for 15 minutes from slot start. Unclaimed bookings will be cancelled.</span>
+        </div>
+
         <div class="ticket-address-footer">
           <span>Venue: Offgrid Gamers · 3rd Floor, 15, Velachery Main Rd, Anna Garden, Chennai – 600042</span>
         </div>
@@ -908,7 +916,12 @@ window.downloadTicketImage = function() {
 
   ctx.fillStyle = '#94a3b8';
   ctx.font = '22px "Plus Jakarta Sans", sans-serif';
-  ctx.fillText('Guaranteed console reservation. Please present this pass on arrival.', 100, 1225);
+  ctx.fillText('Guaranteed console reservation. Please present this pass on arrival.', 100, 1220);
+
+  // 15-Minute Policy Note on Canvas
+  ctx.fillStyle = '#f59e0b';
+  ctx.font = 'bold 20px "Plus Jakarta Sans", sans-serif';
+  ctx.fillText('⏱ ENTRY POLICY: Station held for 15 mins only. Unclaimed bookings will be cancelled.', 100, 1255);
 
   // Barcode visualization
   ctx.fillStyle = '#475569';
@@ -916,7 +929,7 @@ window.downloadTicketImage = function() {
   const barPattern = [4, 2, 8, 3, 2, 6, 3, 8, 4, 2, 6, 3, 8, 4, 3, 6, 2, 8, 3, 4, 6, 8, 2, 4];
   for (let i = 0; i < 40; i++) {
     const w = barPattern[i % barPattern.length];
-    ctx.fillRect(barX, 1280, w, 60);
+    ctx.fillRect(barX, 1290, w, 55);
     barX += w + 6;
     if (barX > 1050) break;
   }

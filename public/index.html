@@ -254,6 +254,15 @@
             <span>Guaranteed console allocation: Official Offgrid Gamers</span>
           </div>
 
+          <!-- 15-Minute Policy Note -->
+          <div class="pass-policy-note">
+            <svg class="policy-clock-svg" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            <span><strong>15-Minute Policy:</strong> Console held for 15 mins from start time. Unclaimed slots will be cancelled.</span>
+          </div>
+
         </div>
 
       </div>
@@ -297,6 +306,17 @@
         </div>
       </div>
 
+      <!-- 15-Minute Policy Alert Banner -->
+      <div class="modal-policy-alert">
+        <svg class="alert-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10" />
+          <polyline points="12 6 12 12 16 14" />
+        </svg>
+        <div class="alert-text">
+          <strong>15-Minute Arrival Grace Period:</strong> You must check in at the counter within 15 minutes of your session start time. If unclaimed after 15 minutes, your booking will be cancelled and the station released.
+        </div>
+      </div>
+
       <!-- Form -->
       <form class="checkout-form" id="checkoutForm" novalidate>
         
@@ -326,7 +346,7 @@
             <input type="checkbox" id="inputConfirm" required />
             <span class="custom-checkbox-box"></span>
             <span class="checkbox-caption">
-              I confirm I will definitely arrive at Offgrid Gamers (Velachery) for my reserved session.
+              I understand my station will be held for 15 minutes only, and confirm I will arrive on time at Offgrid Gamers (Velachery).
             </span>
           </label>
           <span class="field-error" id="errConfirm"></span>
