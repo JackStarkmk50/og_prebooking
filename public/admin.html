@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Portal: Offgrid Gamers GTA VI Bookings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --color-canvas:         #0a0b0e;
+      --color-canvas-subtle:  #0f1117;
+      --color-surface:        #141720;
+      --color-surface-hover:  #1a1e2b;
+      --color-surface-active: #202636;
+      --color-surface-inset:  #0d0e13;
+      --color-border-subtle:  rgba(255, 255, 255, 0.07);
+      --color-border-default: rgba(255, 255, 255, 0.12);
+      --color-border-strong:  rgba(255, 255, 255, 0.22);
+      --color-text-primary:   #f8fafc;
+      --color-text-secondary: #94a3b8;
+      --color-text-tertiary:  #64748b;
+      --color-text-muted:     #475569;
+      --color-brand:          #d26415;
+      --color-brand-hover:    #e26f1c;
+      --color-brand-subtle:   rgba(210, 100, 21, 0.12);
+      --color-brand-border:   rgba(210, 100, 21, 0.45);
+      --color-brand-ink:      #0a0b0e;
+      --color-hardcore:        #818cf8;
+      --color-hardcore-subtle: rgba(129, 140, 248, 0.12);
+      --color-lounge:          #34d399;
+      --color-lounge-subtle:   rgba(52, 211, 153, 0.12);
+      --color-success:         #10b981;
+      --color-error:           #f43f5e;
+      --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --radius-pill: 9999px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      background-color: var(--color-canvas);
+      color: var(--color-text-primary);
+      font-family: var(--font-sans);
+      font-size: 14.5px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    img, svg { display: block; }
+    button, input, select {
+      font-family: inherit; font-size: inherit; color: inherit;
+      background: none; border: none; outline: none;
+    }
+    button { cursor: pointer; }
+    .hidden { display: none !important; }
+
+    /* Header */
+    .admin-header {
+      background-color: var(--color-canvas-subtle);
+      border-bottom: 1px solid var(--color-border-subtle);
+      position: sticky; top: 0; z-index: 50;
+    }
+    .admin-header-inner {
+      max-width: 1400px; margin: 0 auto; padding: 14px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; flex-wrap: wrap;
+    }
+    .brand-group {
+      display: flex; align-items: center; gap: 14px;
+    }
+    .brand-logo-img { height: 36px; width: auto; object-fit: contain; }
+    .brand-divider { width: 1px; height: 22px; background: var(--color-border-default); }
+    .admin-badge {
+      background: var(--color-brand); color: var(--color-brand-ink);
+      font-weight: 700; font-size: 11px; padding: 3px 8px; border-radius: var(--radius-sm);
+    }
+    .header-actions {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .btn-secondary {
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border-default);
+      color: var(--color-text-secondary);
+      font-weight: 600; font-size: 12.5px; padding: 7px 14px;
+      border-radius: var(--radius-sm);
+      display: inline-flex; align-items: center; gap: 6px;
+      transition: background-color 0.15s, color 0.15s;
+    }
+    .btn-secondary:hover {
+      background-color: var(--color-surface-hover); color: var(--color-text-primary);
+    }
+    .btn-secondary svg { width: 14px; height: 14px; }
+    .btn-logout {
+      color: var(--color-error); border-color: rgba(244, 63, 94, 0.3);
+    }
+    .btn-logout:hover {
+      background: rgba(244, 63, 94, 0.1); color: var(--color-error);
+    }
+
+    .btn-delete {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(244, 63, 94, 0.1); color: var(--color-error);
+      border: 1px solid rgba(244, 63, 94, 0.25); border-radius: var(--radius-sm);
+      padding: 5px 10px; font-size: 11.5px; font-weight: 600;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .btn-delete:hover {
+      background: var(--color-error); color: #ffffff; border-color: var(--color-error);
+    }
+    .btn-delete svg { width: 13px; height: 13px; }
+
+    /* Main Container */
+    .admin-container {
+      max-width: 1400px; margin: 0 auto; padding: 24px;
+      display: flex; flex-direction: column; gap: 24px;
+    }
+
+    /* KPI Summary Row */
+    .kpi-row {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+    }
+    .kpi-card {
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border-default);
+      border-radius: var(--radius-md); padding: 18px 20px;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .kpi-label {
+      font-size: 12px; font-weight: 600; color: var(--color-text-tertiary);
+    }
+    .kpi-value {
+      font-family: var(--font-mono); font-size: 26px; font-weight: 800; color: var(--color-text-primary);
+    }
+    .kpi-value.brand { color: var(--color-brand); }
+    .kpi-value.success { color: var(--color-success); }
+
+    /* Controls & Filter Bar */
+    .filter-card {
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border-default);
+      border-radius: var(--radius-md); padding: 16px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; flex-wrap: wrap;
+    }
+    .search-box {
+      flex: 2; min-width: 280px;
+      display: flex; align-items: center; gap: 10px;
+      background-color: var(--color-canvas-subtle);
+      border: 1px solid var(--color-border-default);
+      border-radius: var(--radius-sm); padding: 8px 14px;
+      transition: border-color 0.15s;
+    }
+    .search-box:focus-within {
+      border-color: var(--color-brand);
+    }
+    .search-box svg { width: 16px; height: 16px; color: var(--color-text-tertiary); flex-shrink: 0; }
+    .search-box input {
+      width: 100%; font-size: 13.5px; color: var(--color-text-primary);
+    }
+    .search-box input::placeholder { color: var(--color-text-muted); }
+
+    .filter-group {
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    .filter-select {
+      background-color: var(--color-canvas-subtle);
+      border: 1px solid var(--color-border-default);
+      border-radius: var(--radius-sm); padding: 8px 12px;
+      font-size: 13px; font-weight: 600; color: var(--color-text-primary);
+      cursor: pointer;
+    }
+    .filter-select:focus { border-color: var(--color-brand); }
+    .filter-select option { background-color: var(--color-surface); color: var(--color-text-primary); }
+
+    /* Bookings Table Container */
+    .table-card {
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border-default);
+      border-radius: var(--radius-md); overflow: hidden;
+    }
+    .table-header-bar {
+      padding: 16px 20px; border-bottom: 1px solid var(--color-border-subtle);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .table-title {
+      font-size: 15px; font-weight: 700; color: var(--color-text-primary);
+    }
+    .results-count {
+      font-size: 12.5px; color: var(--color-text-tertiary);
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%; border-collapse: collapse; text-align: left;
+    }
+    th {
+      background-color: var(--color-canvas-subtle);
+      color: var(--color-text-tertiary); font-size: 11.5px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.04em;
+      padding: 12px 18px; border-bottom: 1px solid var(--color-border-subtle);
+      white-space: nowrap;
+    }
+    td {
+      padding: 16px 18px; border-bottom: 1px solid var(--color-border-subtle);
+      font-size: 13.5px; vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background-color: var(--color-surface-hover); }
+
+    /* Badges & Elements */
+    .ref-code {
+      font-family: var(--font-mono); font-size: 13.5px; font-weight: 700;
+      color: var(--color-brand); display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-copy-mini {
+      color: var(--color-text-tertiary); padding: 2px; border-radius: 3px;
+    }
+    .btn-copy-mini:hover { color: var(--color-text-primary); }
+    .btn-copy-mini svg { width: 13px; height: 13px; }
+
+    .time-window {
+      font-weight: 700; color: var(--color-text-primary); display: block;
+    }
+    .time-date {
+      font-size: 11.5px; color: var(--color-text-tertiary); display: block; margin-top: 1px;
+    }
+
+    .station-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11.5px; font-weight: 700; padding: 4px 10px;
+      border-radius: var(--radius-sm); white-space: nowrap;
+    }
+    .station-badge.hardcore {
+      background: var(--color-hardcore-subtle); color: var(--color-hardcore);
+      border: 1px solid rgba(129, 140, 248, 0.3);
+    }
+    .station-badge.lounge {
+      background: var(--color-lounge-subtle); color: var(--color-lounge);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+    }
+
+    .guest-name { font-weight: 600; color: var(--color-text-primary); }
+    .contact-links {
+      display: flex; align-items: center; gap: 8px; margin-top: 2px;
+    }
+    .phone-text {
+      font-family: var(--font-mono); font-size: 12.5px; color: var(--color-text-secondary);
+      text-decoration: none;
+    }
+    .phone-text:hover { color: var(--color-brand); text-decoration: underline; }
+    .wa-btn {
+      color: #25d366; display: inline-flex; align-items: center;
+      padding: 2px; border-radius: 3px;
+    }
+    .wa-btn svg { width: 15px; height: 15px; }
+
+    .amount-cell {
+      font-family: var(--font-mono); font-weight: 800; font-size: 15px;
+      color: var(--color-success); white-space: nowrap;
+    }
+    .confirmed-pill {
+      display: inline-block; font-size: 11px; font-weight: 700;
+      color: var(--color-success); background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 3px 8px; border-radius: var(--radius-xs);
+    }
+    .timestamp {
+      font-size: 11px; color: var(--color-text-tertiary); white-space: nowrap;
+    }
+
+    /* Empty state */
+    .empty-state {
+      padding: 60px 20px; text-align: center; color: var(--color-text-tertiary);
+    }
+    .empty-state svg { width: 40px; height: 40px; margin: 0 auto 12px; color: var(--color-text-muted); }
+
+    /* Login Screen */
+    .login-overlay {
+      position: fixed; inset: 0; background: var(--color-canvas);
+      display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 1000;
+    }
+    .login-card {
+      width: 100%; max-width: 420px; background: var(--color-surface);
+      border: 1px solid var(--color-border-default); border-radius: var(--radius-lg);
+      padding: 36px 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+      display: flex; flex-direction: column; gap: 20px; text-align: center;
+    }
+    .login-logo { height: 44px; margin: 0 auto; object-fit: contain; }
+    .login-title { font-size: 20px; font-weight: 800; color: var(--color-text-primary); }
+    .login-desc { font-size: 13px; color: var(--color-text-secondary); margin-top: -12px; }
+    .login-input {
+      width: 100%; background: var(--color-canvas-subtle);
+      border: 1px solid var(--color-border-default); border-radius: var(--radius-sm);
+      padding: 12px 16px; font-size: 14.5px; color: var(--color-text-primary);
+      transition: border-color 0.15s;
+    }
+    .login-input:focus { border-color: var(--color-brand); outline: 2px solid var(--color-brand); }
+    .btn-login {
+      background: var(--color-brand); color: var(--color-brand-ink);
+      font-weight: 700; font-size: 14px; padding: 12px; border-radius: var(--radius-sm);
+      transition: background 0.15s;
+    }
+    .btn-login:hover { background: var(--color-brand-hover); }
+    .login-error { color: var(--color-error); font-size: 12px; min-height: 18px; }
+
+    @media (max-width: 900px) {
+      .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .kpi-row { grid-template-columns: 1fr; }
+      .filter-card { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════════ LOGIN GATE ═══════════════════ -->
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-card">
+      <img src="/logo.png" alt="Offgrid Gamers" class="login-logo" />
+      <div>
+        <h1 class="login-title">Admin Management Portal</h1>
+        <p class="login-desc">Enter your administrative passkey to view bookings.</p>
+      </div>
+
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <input type="password" id="adminPasswordInput" class="login-input" placeholder="Enter Admin Password" required autocomplete="current-password" autofocus />
+          <span class="login-error" id="loginError"></span>
+          <button type="submit" class="btn-login" id="btnLogin">Access Dashboard →</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ MAIN ADMIN DASHBOARD ═══════════════════ -->
+  <div id="adminApp" class="hidden">
+    
+    <!-- Top Bar -->
+    <header class="admin-header">
+      <div class="admin-header-inner">
+        <div class="brand-group">
+          <img src="/logo.png" alt="Offgrid Gamers" class="brand-logo-img" />
+          <div class="brand-divider"></div>
+          <span class="admin-badge">ADMIN PORTAL</span>
+          <span style="font-size: 12px; color: var(--color-text-tertiary); font-weight: 600;">GTA VI RESERVATIONS</span>
+        </div>
+
+        <div class="header-actions">
+          <button class="btn-secondary" onclick="fetchBookings()" title="Sync Bookings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+            </svg>
+            <span>Refresh</span>
+          </button>
+          
+          <button class="btn-secondary" onclick="exportCSV()" title="Export CSV Spreadsheet">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            <span>Export CSV</span>
+          </button>
+
+          <a href="/" class="btn-secondary" target="_blank" title="Open Public Booking Page">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+              <polyline points="15 3 21 3 21 9" />
+              <line x1="10" y1="14" x2="21" y2="3" />
+            </svg>
+            <span>Booking Page</span>
+          </a>
+
+          <button class="btn-secondary btn-logout" onclick="handleLogout()" title="Sign Out">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            <span>Logout</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content Workspace -->
+    <main class="admin-container">
+      
+      <!-- KPI Stats -->
+      <section class="kpi-row">
+        <div class="kpi-card">
+          <span class="kpi-label">TOTAL RESERVATIONS</span>
+          <span class="kpi-value" id="kpiTotal">0</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">TOTAL PROJECTED REVENUE</span>
+          <span class="kpi-value success" id="kpiRevenue">₹0</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">TOTAL BOOKED HOURS</span>
+          <span class="kpi-value brand" id="kpiHours">0 hrs</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">ACTIVE STATIONS BOOKED</span>
+          <span class="kpi-value" id="kpiStations">0 / 4</span>
+        </div>
+      </section>
+
+      <!-- Search & Filters -->
+      <section class="filter-card">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input type="text" id="searchInput" placeholder="Filter by Booking ID, Customer Name, or Mobile..." oninput="applyFilters()" />
+        </div>
+
+        <div class="filter-group">
+          <!-- Station Filter -->
+          <select id="stationFilter" class="filter-select" onchange="applyFilters()">
+            <option value="ALL">All Stations (4)</option>
+            <option value="PS1 Hardcore">PS1 Hardcore</option>
+            <option value="PS2 Hardcore">PS2 Hardcore</option>
+            <option value="PS3 Hardcore">PS3 Hardcore</option>
+            <option value="PS4 Lounge">PS4 Lounge</option>
+          </select>
+
+          <!-- Date Filter -->
+          <select id="dateFilter" class="filter-select" onchange="applyFilters()">
+            <option value="ALL">All Reservation Dates</option>
+          </select>
+
+          <!-- Sort Order -->
+          <select id="sortOrder" class="filter-select" onchange="applyFilters()">
+            <option value="TIME_ASC">Sort: Session Time (Earliest First)</option>
+            <option value="TIME_DESC">Sort: Session Time (Latest First)</option>
+            <option value="CREATED_DESC">Sort: Booking Placed (Newest First)</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- Bookings Data Table -->
+      <section class="table-card">
+        <div class="table-header-bar">
+          <h2 class="table-title">Confirmed Session Schedule</h2>
+          <span class="results-count" id="resultsCount">Loading reservations…</span>
+        </div>
+
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Booking Ref</th>
+                <th>Session Time &amp; Date</th>
+                <th>Console Station</th>
+                <th>Customer Name</th>
+                <th>Mobile Contact</th>
+                <th>Amount</th>
+                <th>Attendance</th>
+                <th>Booked At</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="bookingsTableBody">
+              <!-- Populated via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div id="tableEmptyState" class="empty-state hidden">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+          <p>No bookings found matching your current filter criteria.</p>
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <script>
+    'use strict';
+
+    let allBookings = [];
+    let authToken = sessionStorage.getItem('og_admin_token') || '';
+
+    function formatHour(h) {
+      if (h === 0) return '12:00 AM';
+      if (h < 12) return `${String(h).padStart(2, '0')}:00 AM`;
+      if (h === 12) return '12:00 PM';
+      return `${String(h - 12).padStart(2, '0')}:00 PM`;
+    }
+
+    function formatContinuousRange(slots) {
+      if (!slots || slots.length === 0) return '—';
+      const sorted = [...slots].sort((a, b) => a - b);
+      const start = sorted[0];
+      const end = (sorted[sorted.length - 1] + 1) % 24;
+      return `${formatHour(start)} – ${formatHour(end)}`;
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '—';
+      const d = new Date(iso + 'T00:00:00');
+      return d.toLocaleDateString('en-IN', {
+        weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+      });
+    }
+
+    function formatTimestamp(ts) {
+      if (!ts) return '—';
+      try {
+        const d = new Date(ts.replace(' ', 'T') + 'Z');
+        return d.toLocaleDateString('en-IN', {
+          day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+        });
+      } catch (e) {
+        return ts;
+      }
+    }
+
+    // ── Authentication ──────────────────────────────────────
+    async function handleLogin(e) {
+      e.preventDefault();
+      const pwd = document.getElementById('adminPasswordInput').value.trim();
+      const errEl = document.getElementById('loginError');
+      errEl.textContent = '';
+
+      try {
+        const res = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: pwd })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          errEl.textContent = data.error || 'Invalid admin credentials.';
+          return;
+        }
+
+        authToken = data.token;
+        sessionStorage.setItem('og_admin_token', authToken);
+        showDashboard();
+      } catch (err) {
+        errEl.textContent = 'Connection error. Please retry.';
+      }
+    }
+
+    function handleLogout() {
+      sessionStorage.removeItem('og_admin_token');
+      authToken = '';
+      document.getElementById('loginOverlay').classList.remove('hidden');
+      document.getElementById('adminApp').classList.add('hidden');
+      document.getElementById('adminPasswordInput').value = '';
+    }
+
+    function showDashboard() {
+      document.getElementById('loginOverlay').classList.add('hidden');
+      document.getElementById('adminApp').classList.remove('hidden');
+      fetchBookings();
+    }
+
+    // ── Fetch Bookings ─────────────────────────────────────
+    async function fetchBookings() {
+      if (!authToken) {
+        handleLogout();
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/admin/bookings', {
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+
+        if (res.status === 401) {
+          handleLogout();
+          return;
+        }
+
+        const data = await res.json();
+        allBookings = data.bookings || [];
+        populateDateFilterOptions();
+        applyFilters();
+      } catch (err) {
+        console.error('Failed to load bookings', err);
+      }
+    }
+
+    function populateDateFilterOptions() {
+      const dateSelect = document.getElementById('dateFilter');
+      const uniqueDates = [...new Set(allBookings.map(b => b.date))].sort();
+
+      const currentVal = dateSelect.value;
+      dateSelect.innerHTML = '<option value="ALL">All Reservation Dates</option>';
+      uniqueDates.forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d;
+        opt.textContent = `${formatDate(d)} (${d})`;
+        dateSelect.appendChild(opt);
+      });
+      if (uniqueDates.includes(currentVal)) {
+        dateSelect.value = currentVal;
+      }
+    }
+
+    // ── Filtering & Sorting Engine ─────────────────────────
+    function applyFilters() {
+      const q = document.getElementById('searchInput').value.trim().toLowerCase();
+      const station = document.getElementById('stationFilter').value;
+      const date = document.getElementById('dateFilter').value;
+      const sort = document.getElementById('sortOrder').value;
+
+      let filtered = allBookings.filter(b => {
+        // Query match: ID, name, or mobile
+        if (q) {
+          const matchId = (b.booking_id || '').toLowerCase().includes(q);
+          const matchName = (b.customer_name || '').toLowerCase().includes(q);
+          const matchPhone = (b.customer_mobile || '').toLowerCase().includes(q);
+          if (!matchId && !matchName && !matchPhone) return false;
+        }
+
+        // Station match
+        if (station !== 'ALL' && b.ps_name !== station) {
+          return false;
+        }
+
+        // Date match
+        if (date !== 'ALL' && b.date !== date) {
+          return false;
+        }
+
+        return true;
+      });
+
+      // Sorting
+      if (sort === 'TIME_ASC') {
+        filtered.sort((a, b) => {
+          if (a.date !== b.date) return a.date.localeCompare(b.date);
+          return (a.startHour || 0) - (b.startHour || 0);
+        });
+      } else if (sort === 'TIME_DESC') {
+        filtered.sort((a, b) => {
+          if (a.date !== b.date) return b.date.localeCompare(a.date);
+          return (b.startHour || 0) - (a.startHour || 0);
+        });
+      } else if (sort === 'CREATED_DESC') {
+        filtered.sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
+      }
+
+      renderTable(filtered);
+      renderKPIs(filtered);
+    }
+
+    // ── Render KPIs ────────────────────────────────────────
+    function renderKPIs(list) {
+      document.getElementById('kpiTotal').textContent = list.length;
+      
+      const totalRev = list.reduce((sum, b) => sum + (Number(b.total_price) || 0), 0);
+      document.getElementById('kpiRevenue').textContent = `₹${totalRev.toLocaleString('en-IN')}`;
+
+      const totalHours = list.reduce((sum, b) => sum + (b.hoursCount || 0), 0);
+      document.getElementById('kpiHours').textContent = `${totalHours} hrs`;
+
+      const stationsSet = new Set(list.map(b => b.ps_name));
+      document.getElementById('kpiStations').textContent = `${stationsSet.size} / 4`;
+    }
+
+    // ── Render Bookings Table ──────────────────────────────
+    function renderTable(list) {
+      const tbody = document.getElementById('bookingsTableBody');
+      const emptyState = document.getElementById('tableEmptyState');
+      const countEl = document.getElementById('resultsCount');
+
+      countEl.textContent = `Showing ${list.length} reservation${list.length !== 1 ? 's' : ''}`;
+
+      if (list.length === 0) {
+        tbody.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      tbody.innerHTML = list.map(b => {
+        const isLounge = (b.ps_name || '').toLowerCase().includes('lounge');
+        const stationClass = isLounge ? 'lounge' : 'hardcore';
+        const range = formatContinuousRange(b.slots);
+        const hours = b.hoursCount || (b.slots ? b.slots.length : 0);
+
+        return `
+          <tr>
+            <td>
+              <span class="ref-code">
+                ${b.booking_id}
+                <button class="btn-copy-mini" onclick="copyRef('${b.booking_id}')" title="Copy Reference">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                  </svg>
+                </button>
+              </span>
+            </td>
+            <td>
+              <span class="time-window">${range} (${hours} hr${hours > 1 ? 's' : ''})</span>
+              <span class="time-date">${formatDate(b.date)}</span>
+            </td>
+            <td>
+              <span class="station-badge ${stationClass}">
+                ${isLounge ? '🛋️' : '🎮'} ${b.ps_name}
+              </span>
+            </td>
+            <td>
+              <span class="guest-name">${escapeHTML(b.customer_name)}</span>
+            </td>
+            <td>
+              <div class="contact-links">
+                <a href="tel:+91${b.customer_mobile}" class="phone-text" title="Call Customer">+91 ${b.customer_mobile}</a>
+                <a href="https://wa.me/91${b.customer_mobile}?text=${encodeURIComponent(`Hi ${b.customer_name}, confirming your GTA VI PlayStation 5 booking at Offgrid Gamers (Booking ID: ${b.booking_id}) on ${formatDate(b.date)} at ${range}. See you there!`)}" 
+                   target="_blank" class="wa-btn" title="Message on WhatsApp">
+                  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/>
+                  </svg>
+                </a>
+              </div>
+            </td>
+            <td>
+              <span class="amount-cell">₹${(b.total_price || 0).toLocaleString('en-IN')}</span>
+            </td>
+            <td>
+              <span class="confirmed-pill">Confirmed ✓</span>
+            </td>
+            <td>
+              <span class="timestamp">${formatTimestamp(b.created_at)}</span>
+            </td>
+            <td>
+              <button class="btn-delete" onclick="deleteBooking(${b.id}, '${b.booking_id}', '${escapeHTML(b.customer_name)}')" title="Cancel and Delete Reservation">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <polyline points="3 6 5 6 21 6" />
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                </svg>
+                <span>Delete</span>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function escapeHTML(str) {
+      if (!str) return '';
+      return str.replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+      }[tag] || tag));
+    }
+
+    window.copyRef = function(ref) {
+      navigator.clipboard.writeText(ref).then(() => {
+        alert(`Booking ID ${ref} copied.`);
+      }).catch(() => {
+        prompt('Booking ID:', ref);
+      });
+    };
+
+    window.deleteBooking = async function(id, bookingRef, name) {
+      if (!confirm(`Are you sure you want to cancel and delete booking ${bookingRef} for ${name}?\n\nThis will free up the console time slots immediately.`)) {
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/admin/bookings/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          alert(data.error || 'Failed to delete booking.');
+          return;
+        }
+        fetchBookings();
+      } catch (err) {
+        alert('Connection error while attempting to delete booking.');
+      }
+    };
+
+    // ── Export to CSV ──────────────────────────────────────
+    function exportCSV() {
+      if (!allBookings || allBookings.length === 0) {
+        alert('No bookings available to export.');
+        return;
+      }
+
+      const headers = ['Booking ID', 'Station', 'Date', 'Start Time', 'End Time', 'Hours', 'Customer Name', 'Mobile Number', 'Total Amount', 'Confirmed', 'Created At'];
+      const rows = allBookings.map(b => [
+        b.booking_id,
+        b.ps_name,
+        b.date,
+        formatHour(b.startHour),
+        formatHour(b.endHour),
+        b.hoursCount,
+        `"${(b.customer_name || '').replace(/"/g, '""')}"`,
+        b.customer_mobile,
+        b.total_price,
+        b.confirmed ? 'Yes' : 'No',
+        b.created_at
+      ]);
+
+      const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `Offgrid-Gamers-GTA6-Bookings-${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // ── Bootstrap ──────────────────────────────────────────
+    if (authToken) {
+      showDashboard();
+    } else {
+      document.getElementById('loginOverlay').classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
